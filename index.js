@@ -2,8 +2,11 @@ var mssql = require("mssql");
 var exprss = require('express')
 var app = exprss()
 var cors = require('cors')
-
+require('dotenv').config()
+var TelegramBot = require("node-telegram-bot-api")
 app.use(cors())
+app.use(exprss.json());
+app.use(exprss.urlencoded({extended :true}))
 // mssql config
 
 var dbConfig = {
@@ -38,6 +41,14 @@ app.get("/getpunch", async (req, res) => {
         if (err) {
             console.log(err);
         }
+        setTimeout(()=>{
+            run = false
+            try{
+                return res.status(400).json({message : "Hello how are you"})
+            }
+            catch{
+            }
+        },10000);
         var run = true
         while (run) {
             console.log("In loop");
@@ -59,7 +70,6 @@ app.get("/getpunch", async (req, res) => {
                             await conn.query(`UPDATE [ONtime_Att].[dbo].[Tran_DeviceAttRec] set [remarks] = 'true' WHERE [sno_id] = ${sno_id}`, async (err, record) => {
                                 console.log(record);
                                 run = false
-                                await conn.close()
                                 return res.status(200).json(responce);
                             })
                         }
@@ -67,12 +77,26 @@ app.get("/getpunch", async (req, res) => {
                 }
             })
             await sleep(1000)
-            console.log("closing");
+
         }
     });
 })
 app.get("/punchapi/health", async (req, res) => {
     res.status(200).send("Success")
+})
+app.post("/sendTelegram",(req,res)=>{
+    let url = req.body['url'];
+    let mes = req.body['mes'];
+    console.log(req.body);
+    // const token = process.env.BOT_TOKEN;
+    const token = "5851040555:AAFWjOGSBUgUyxuqZHqahNi6oBvueEo988o";
+    const bot = new TelegramBot(token);
+    try {
+      bot.sendPhoto(-1001493712763, fs.readFileSync(url), { caption: mes });
+    } catch {
+      bot.sendMessage(-1001493712763, mes);
+    }
+    return res.status(200).send("url");
 })
 app.listen(3000, () => {
     console.log("Server running on port 3000");
