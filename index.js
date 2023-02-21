@@ -35,22 +35,18 @@ app.get("/getpunch", async (req, res) => {
     const sleep = (time) => {
         return new Promise((resolve) => setTimeout(resolve, time))
     }      
-    
     var conn = new mssql.ConnectionPool(dbConfig);
     await conn.connect(async function (err) {
-        if (err) {
+        if (err) {  
             console.log(err);
         }
-        setTimeout(()=>{
-            run = false
-            try{
-                return res.status(400).json({message : "Hello how are you"})
-            }
-            catch{
-            }
-        },10000);
+        let count = 0;
         var run = true
         while (run) {
+            count += 1
+            if(count == 10){
+                return res.status(200).json("This is Very bold")
+            }
             console.log("In loop");
             await conn.query("SELECT  TOP 1 [Punch_month],[Emp_id],[Card_Number],[Att_PunchDownDate],[Att_PunchRecDate],[sno_id],[remarks] FROM [ONtime_Att].[dbo].[Tran_DeviceAttRec] ORDER BY [sno_id] DESC ", async (err, record) => {
                 if (err) {
@@ -77,7 +73,6 @@ app.get("/getpunch", async (req, res) => {
                 }
             })
             await sleep(1000)
-
         }
     });
 })
