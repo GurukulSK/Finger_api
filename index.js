@@ -11,7 +11,7 @@ app.use(exprss.urlencoded({extended :true}))
 
 var dbConfig = {
 
-    server: "DESKTOP-006M8ES\\SQLEXPRESS",
+    server: "DESKTOP-PMQC8H3\\SQLEXPRESS",
 
     database: "ONtime_Att",
 
@@ -40,6 +40,9 @@ app.get("/getpunch", async (req, res) => {
         if (err) {  
             console.log(err);
         }
+        await conn.query(`UPDATE [ONtime_Att].[dbo].[Tran_DeviceAttRec] set [remarks] = 'true'`, async (err, record) => {
+            console.log(record);
+        })
         let count = 0;
         var run = true
         while (run) {
