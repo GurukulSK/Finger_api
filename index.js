@@ -4,6 +4,7 @@ var app = exprss()
 var cors = require('cors')
 require('dotenv').config()
 var TelegramBot = require("node-telegram-bot-api")
+var fs = require('fs')
 app.use(cors())
 app.use(exprss.json());
 app.use(exprss.urlencoded({extended :true}))
@@ -90,7 +91,7 @@ app.post("/sendTelegram",(req,res)=>{
     const token = "5851040555:AAFWjOGSBUgUyxuqZHqahNi6oBvueEo988o";
     const bot = new TelegramBot(token);
     try {
-      bot.sendPhoto(-1001493712763, fs.readFileSync(url), { caption: mes });
+      bot.sendPhoto(-1001493712763, url, { caption: mes });
     } catch {
       bot.sendMessage(-1001493712763, mes);
     }
