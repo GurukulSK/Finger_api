@@ -84,17 +84,17 @@ app.get("/punchapi/health", async (req, res) => {
     res.status(200).send("Success")
 })
 app.post("/sendTelegram",(req,res)=>{
-    let url = req.body['url'];
+    let gid = req.body['gid'];
     let mes = req.body['mes'];
     console.log(req.body);
     // const token = process.env.BOT_TOKEN;
     const token = "5851040555:AAFWjOGSBUgUyxuqZHqahNi6oBvueEo988o";
     const bot = new TelegramBot(token);
-    try {
-      bot.sendPhoto(-1001493712763, url, { caption: mes });
-    } catch {
-      bot.sendMessage(-1001493712763, mes);
-    }
+    // try {
+      bot.sendPhoto(-1001873566418,fs.readFileSync("C:\\xampp\\htdocs\\Students\\"+gid+".jpg"), { caption: mes });
+    // } catch {
+    //   bot.sendMessage(-1001873566418, mes);
+    // }
     return res.status(200).send("url");
 })
 app.listen(3000, () => {
