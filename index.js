@@ -1,14 +1,23 @@
 var mssql = require("mssql");
 var exprss = require('express')
 var app = exprss()
+var mysql = require('mysql')
 var cors = require('cors')
 require('dotenv').config()
 var TelegramBot = require("node-telegram-bot-api")
-var fs = require('fs')
+var fs = require('fs');
+const { errorMonitor } = require("events");
+
 app.use(cors())
 app.use(exprss.json());
 app.use(exprss.urlencoded({extended :true}))
 // mssql config
+const pool = mysql.createPool({
+    database : 'test',
+    user :'root',
+    port:3306,
+    host:"localhost"
+})
 
 var dbConfig = {
 
@@ -83,36 +92,71 @@ app.get("/getpunch", async (req, res) => {
 app.get("/punchapi/health", async (req, res) => {
     res.status(200).send("Success")
 })
-app.post("/sendTelegram",(req,res)=>{
-    let url = req.body['url'];
+app.post("/sendTelegram",async(req,res)=>{
+    let gid = req.body['gid'];
     let mes = req.body['mes'];
     console.log(req.body);
     // const token = process.env.BOT_TOKEN;
     const token = "5851040555:AAFWjOGSBUgUyxuqZHqahNi6oBvueEo988o";
     const bot = new TelegramBot(token);
+    let mes_data;
+    mes = "```"+mes+"```";
+    // mes = ""+mes+"&#771;";
     try {
-      bot.sendPhoto(-1001493712763, url, { caption: mes });
+        mes_data=await bot.sendPhoto(-1001873566418, url, { caption: mes ,parse_mode:"Markdown"});
     } catch {
-      bot.sendMessage(-1001493712763, mes);
+        mes_data= await bot.sendMessage(-1001873566418, mes,{parse_mode:"MarkdownV2"});
     }
-    return res.status(200).send("url");
+    pool.query("INSERT INTO `mes` (`id`, `gid`, `meg_id`,`msg`, `flag`) VALUES (NULL, '"+gid+"', '"+mes_data.message_id+"','"+mes+"', '0');",(err,result)=>{
+        if(err){
+            return res.status(400).json(errorMonitor)
+        }
+        return res.status(200).send("url");
+    }) 
 })
 
 
-app.get("/delmes",(req,res)=>{
+app.post("/delmes",async (req,res)=>{
     // Delete Message
+    gid = req.body.gid
+    late = req.body.late
+    time = req.body.time
     const bot = new TelegramBot('5868792096:AAEjVvXipM7O8yMoy2NZZ9oht-Va2Z_m8GQ')
-    bot.deleteMessage(-1001873566418,15)
-    // console.log(bot.getUpdates());
-})
-app.get("/sendmes",(req,res)=>{
-    const bot = new TelegramBot('5851040555:AAFWjOGSBUgUyxuqZHqahNi6oBvueEo988o',{polling: true})
-    // bot.on("message",(mes,meta)=>{
-    //     bot.sendMessage(mes.chat.id,mes.message_id)
-    // })
-   bot.sendMessage(-1001873566418,"mes from bot")
-})
+    pool.query("SELECT * from `mes` where `gid`="+gid+" and `flag` = 0",async(err,result)=>{
+        
+        console.log(result[0]);
+        bot.deleteMessage(-1001873566418,result[0].meg_id)
+        let message = result[0].msg.replace("```"," ")
+        let msg = `** !! Return !! **\nLate - ${late}\nReturn Time - ${time}\n${message}`;
+        msg = "```"+msg;
+        try{
+            bot.sendPhoto(-1001873566418,url,{caption:msg,parse_mode:"Markdown"})
+        }   
+        catch{
+            bot.sendMessage(-1001873566418,msg,{parse_mode:"Markdown"})
 
+        }
+        pool.query("UPDATE `mes` SET `flag` = 1 where `gid`="+gid+" and `flag` = 0")
+        return res.send("SUCCESS")
+    })
+    
+})
+app.get("/sendmes",async(req,res)=>{
+    let gid = req.body['gid'];
+    let mes = req.body['mes'];
+    console.log(req.body);
+    const token = "5851040555:AAFWjOGSBUgUyxuqZHqahNi6oBvueEo988o";
+    const bot = new TelegramBot(token);
+    let mes_data;
+    try {
+        mes_data=await bot.sendPhoto(-1001873566418, url, { caption: mes });
+    } catch {
+        mes_data= await bot.sendMessage(-1001873566418, mes);
+    }
+
+    return res.status(200).send("Hello")
+
+})
 app.listen(3000, () => {
     console.log("Server running on port 3000");
 })
