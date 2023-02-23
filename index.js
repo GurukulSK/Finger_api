@@ -97,6 +97,22 @@ app.post("/sendTelegram",(req,res)=>{
     }
     return res.status(200).send("url");
 })
+
+
+app.get("/delmes",(req,res)=>{
+    // Delete Message
+    const bot = new TelegramBot('5868792096:AAEjVvXipM7O8yMoy2NZZ9oht-Va2Z_m8GQ')
+    bot.deleteMessage(-1001873566418,15)
+    // console.log(bot.getUpdates());
+})
+app.get("/sendmes",(req,res)=>{
+    const bot = new TelegramBot('5851040555:AAFWjOGSBUgUyxuqZHqahNi6oBvueEo988o',{polling: true})
+    // bot.on("message",(mes,meta)=>{
+    //     bot.sendMessage(mes.chat.id,mes.message_id)
+    // })
+   bot.sendMessage(-1001873566418,"mes from bot")
+})
+
 app.listen(3000, () => {
     console.log("Server running on port 3000");
 })
