@@ -21,7 +21,7 @@ const pool = mysql.createPool({
 
 var dbConfig = {
 
-    server: "DESKTOP-PMQC8H3\\SQLEXPRESS",
+    server: "admin\\SQLEXPRESS",
 
     database: "ONtime_Att",
 
@@ -103,7 +103,7 @@ app.post("/sendTelegram", async (req, res) => {
     let mes_data;
     let url = "C:\\xampp\\htdocs\\Students\\" + gid + ".jpg"
     try {
-        mes_data = await bot.sendPhoto(-1001873566418, url, { caption: "🙏Jay Swaminarayan🙏\n▶▶▶▶▶▶\n\n" + mes, parse_mode: "Markdown" });
+        mes_data = await bot.sendPhoto(-1001873566418, url, { caption: "🙏Jay Swaminarayan🙏\n\n" + mes, parse_mode: "Markdown" });
     } catch {
         mes_data = await bot.sendMessage(-1001873566418, mes, { parse_mode: "Markdown" });
     }
@@ -132,7 +132,7 @@ app.post("/delmes", async (req, res) => {
 
         }
         let message = result[0].msg
-        let msg = `🙏Jay Swaminarayan🙏\n◀◀◀◀◀◀\n\n !! **Returned** !!\n\nLate - ${late}\nReturn Time - ${time}\n\n${message}`;
+        let msg = `🙏Jay Swaminarayan🙏\n\n◀◀◀◀◀◀\n\n !! **Returned** !!\n\nLate - ${late}\nReturn Time - ${time}\n\n${message}`;
 
         let url = "C:\\xampp\\htdocs\\Students\\" + gid + ".jpg"
         try {
