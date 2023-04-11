@@ -7,6 +7,7 @@ require('dotenv').config()
 var TelegramBot = require("node-telegram-bot-api")
 var fs = require('fs');
 const { errorMonitor } = require("events");
+const { log } = require("console");
 
 app.use(cors())
 app.use(exprss.json());
@@ -21,7 +22,7 @@ const pool = mysql.createPool({
 
 var dbConfig = {
 
-    server: "admin\\SQLEXPRESS",
+    server: "DESKTOP-VTJGLI9\\SQLEXPRESS",
 
     database: "ONtime_Att",
 
@@ -46,26 +47,34 @@ app.get("/getpunch", async (req, res) => {
         return new Promise((resolve) => setTimeout(resolve, time))
     }
     var conn = new mssql.ConnectionPool(dbConfig);
+
+
     await conn.connect(async function (err) {
         if (err) {
             console.log(err);
         }
-        await conn.query(`UPDATE [ONtime_Att].[dbo].[Tran_DeviceAttRec] set [remarks] = 'true'`, async (err, record) => {
+        await conn.query(`UPDATE [ONtime_Att].[dbo].[Tran_DeviceAttRec] set [remarks] = 'true' WHERE [remarks] == null`, async (err, record) => {
             console.log(record);
             let count = 0;
             var run = true
+            if(err){
+                
+            }
+            if(!err){
+                console.log("PUT YOUR FINGER");
+            }
             while (run) {
                 count += 1
                 if (count == 10) {
                     return res.status(200).json("This is Very bold")
                 }
                 console.log("In loop");
-                await conn.query("SELECT  TOP 1 [Punch_month],[Emp_id],[Card_Number],[Att_PunchDownDate],[Att_PunchRecDate],[sno_id],[remarks] FROM [ONtime_Att].[dbo].[Tran_DeviceAttRec] ORDER BY [sno_id] DESC ", async (err, record) => {
+                await conn.query("SELECT TOP 1 [Punch_month],[Emp_id],[Card_Number],[Att_PunchDownDate],[Att_PunchRecDate],[sno_id],[remarks] FROM [ONtime_Att].[dbo].[Tran_DeviceAttRec] ORDER BY [sno_id] DESC ", async (err, record) => {
                     if (err) {
                         console.log(err);
                     }
                     else {
-                        console.log(record['rowsAffected'][0]);
+                        console.log(record);
                         if (record['rowsAffected'][0] != 0) {
                             console.log("In first If");
                             if (record['recordset'][0]['remarks'] != "true") {
@@ -78,6 +87,7 @@ app.get("/getpunch", async (req, res) => {
                                 await conn.query(`UPDATE [ONtime_Att].[dbo].[Tran_DeviceAttRec] set [remarks] = 'true' WHERE [sno_id] = ${sno_id}`, async (err, record) => {
                                     console.log(record);
                                     run = false
+                                    await conn.close()
                                     return res.status(200).json(responce);
                                 })
                             }
@@ -85,7 +95,7 @@ app.get("/getpunch", async (req, res) => {
                     }
                 })
                 await sleep(1000)
-            } 0
+            } 
         })
 
     });
